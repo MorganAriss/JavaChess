@@ -1,7 +1,10 @@
 package Board;
 
-public class BoardUtils {
-    
+import java.io.Serializable;
+
+public class BoardUtils implements Serializable {
+
+    private static final long serialVersionUID = 1L;
     public static final boolean[] FIRST_COLUMN = initColumn(0);
     public static final boolean[] SECOND_COLUMN = initColumn(1);
     public static final boolean[] SEVENTH_COLUMN = initColumn(6);

@@ -3,16 +3,21 @@ package Board;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 
-public class Board extends JFrame implements ActionListener {
+import Chess.*;
+
+public class Board extends JFrame implements ActionListener, Serializable {
 
     private static final long serialVersionUID = 1L;
-    static Tile[][] tiles;
-    static Tile[] oneD;
+    public static Tile[][] tiles = new Tile[BoardUtils.NUM_TILES_PER_ROW][BoardUtils.NUM_TILES_PER_ROW];
+    public static Tile[] oneD = new Tile[BoardUtils.NUM_TILES];
     
     public Board() {
-        tiles = new Tile[BoardUtils.NUM_TILES_PER_ROW][BoardUtils.NUM_TILES_PER_ROW];
-        oneD = new Tile[BoardUtils.NUM_TILES];
 
         JPanel panel = new JPanel(new GridLayout(BoardUtils.NUM_TILES_PER_ROW, BoardUtils.NUM_TILES_PER_ROW));
         for (int i = 0; i < BoardUtils.NUM_TILES_PER_ROW; i++) {
@@ -25,13 +30,36 @@ public class Board extends JFrame implements ActionListener {
         }
         this.add(panel);
         this.setSize(600, 600);
+        JMenuBar menuBar = new JMenuBar();
+        JMenu file = new JMenu("File");
+        menuBar.add(file);
+        JMenuItem save = new JMenuItem("Save");
+        JMenuItem load = new JMenuItem("Load");
+        save.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                saveGameAction();
+            }
+        });
+
+        load.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                loadGameAction();
+            }
+        });
+        file.add(load);
+        file.add(save);
+        
+        this.setJMenuBar(menuBar);
+        
         this.setVisible(true);
+        
         
         int k = 0;
         
         for (int i = 0; i < BoardUtils.NUM_TILES_PER_ROW; i++) {
             for (int j = 0; j < BoardUtils.NUM_TILES_PER_ROW; j++) {
-                oneD[k] = tiles[i][j];
+                Board.oneD[k] = tiles[i][j];
+                Board.oneD[k].setPosition(k);
                 k++;
             }
         }
@@ -48,37 +76,41 @@ public class Board extends JFrame implements ActionListener {
 
     public void actionPerformed(ActionEvent e) {
         Tile t = (Tile) e.getSource();
-        
-        int passedTile = -1;
+
+        Tile passedTile = t;
         
         for (int i = 0; i < BoardUtils.NUM_TILES; i++) {
             if (oneD[i] == t) {
-                passedTile = i;
+                passedTile = (Tile) Board.oneD[i];
                 
-                System.out.println("Tile number " + passedTile + " has been selected.");
+                System.out.println("Tile number " + passedTile.getPosition() + " has been selected.");
                 
-                if(Chess.checkTurn() == Allegiance.WHITE){
-                    Chess.HandleAction(passedTile, Allegiance.WHITE);
-                }else if(Chess.checkTurn() == Allegiance.BLACK){
-                    Chess.HandleAction(passedTile, Allegiance.BLACK);
-                }   
-                
-                /*
-                if(oneD[x].check() == true){
-                    if(Chess.checkTurn() == Allegiance.WHITE)
-                        Chess.HandleAction(x, Allegiance.WHITE);
-                    if(Chess.checkTurn() == Allegiance.BLACK)
-                        Chess.HandleAction(x, Allegiance.BLACK);
-                } else {
-                    System.out.println("Please select a piece" + Chess.checkTurn().player() + "player.");
-                }
-                */
-            }
+                Chess.HandleAction(passedTile);
+            }   
         }
     }
-    public boolean tileEqualsPiece(int tile){
-        if(oneD[tile].pieceAllegiance().team() == Chess.checkTurn().team()){
-            return true;
-        } else return false;
+    
+    public void saveGameAction() {
+        try {
+            FileOutputStream fs = new FileOutputStream("test.gam");
+            ObjectOutputStream os = new ObjectOutputStream(fs);
+            os.writeObject(this);
+            os.close();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public void loadGameAction() {
+        try {
+            this.dispose();
+            FileInputStream fileStream = new FileInputStream("test.gam");
+            ObjectInputStream is = new ObjectInputStream(fileStream);
+            JFrame restore = (JFrame) is.readObject();
+            restore.setVisible(true);
+            is.close();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 }

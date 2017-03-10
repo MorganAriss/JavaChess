@@ -1,15 +1,19 @@
 package Board;
 
-public class Hand {
-    
+import Pieces.*;
+
+import java.io.Serializable;
+
+import Chess.*;
+
+public class Hand implements Serializable {
+
+    private static final long serialVersionUID = 1L;
     private Piece pieceInHand;
-    private int tileCoord;
     private boolean isPieceHeld;
-    private Allegiance handAllegiance;
     
-    Hand(Allegiance a)
+    public Hand()
     {
-        this.handAllegiance = a;
         this.isPieceHeld = false;
     }
 
@@ -21,25 +25,13 @@ public class Hand {
 
     public void nullifyHand() {
         this.pieceInHand = null;
-        this.setIsPieceHeld(false);
-    }
-    
-    public void setIsPieceHeld(boolean b){
-        this.isPieceHeld = b;
-    }
-
-    public int getTileCoord() {
-        return tileCoord;
-    }
-
-    public void setTileCoord(int tileCoord) {
-        this.tileCoord = tileCoord;
+        this.isPieceHeld = false;
     }
     
     public void grabPiece(Piece grabbedPiece){
         this.pieceInHand = grabbedPiece;
-        System.out.println("The " + handAllegiance.player() + " has selected a " + pieceInHand.name() + ".");
-        this.setIsPieceHeld(true);
+        System.out.println("The " + Chess.checkTurn().color() + " has selected a " + pieceInHand.type() + ".");
+        this.isPieceHeld = true;
     }
     
     public boolean check(){
@@ -48,9 +40,5 @@ public class Hand {
     
     public Piece checkPiece(){
         return this.pieceInHand;
-    }
-    
-    public Allegiance getAllegiance(){
-        return this.handAllegiance;
     }
 }
